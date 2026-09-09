@@ -243,21 +243,6 @@ run "invalid_location" {
   expect_failures = [var.location]
 }
 
-run "system_and_user_assigned_identity_are_mutually_exclusive" {
-  command = plan
-
-  variables {
-    managed_identities = {
-      system_assigned = true
-      user_assigned_resource_ids = [
-        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uai",
-      ]
-    }
-  }
-
-  expect_failures = [var.managed_identities]
-}
-
 run "no_criteria_supplied" {
   command = plan
 

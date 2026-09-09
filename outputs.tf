@@ -11,7 +11,6 @@ The metric alert rule. The value is an object with the following attributes:
 - `name` - The name of the metric alert rule.
 - `location` - The Azure region of the metric alert rule. Always `global`.
 - `tags` - The tags applied to the metric alert rule.
-- `identity` - The managed identity configuration of the metric alert rule.
 - `body` - The request body submitted to the Azure Monitor API.
 DESCRIPTION
   value = {
@@ -19,7 +18,6 @@ DESCRIPTION
     name     = azapi_resource.this.name
     location = azapi_resource.this.location
     tags     = azapi_resource.this.tags
-    identity = azapi_resource.this.identity
     body     = azapi_resource.this.body
   }
 }

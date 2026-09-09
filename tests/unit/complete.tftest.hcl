@@ -74,11 +74,6 @@ run "complete_deployment" {
       kind  = "CanNotDelete"
       notes = "protected"
     }
-    managed_identities = {
-      user_assigned_resource_ids = [
-        "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uai",
-      ]
-    }
     role_assignments = {
       reader = {
         role_definition_id_or_name = "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7"
@@ -124,14 +119,6 @@ run "complete_deployment" {
     error_message = "`tags` must be applied to the alert rule."
   }
   assert {
-    condition     = azapi_resource.this.identity[0].type == "UserAssigned"
-    error_message = "A user assigned identity must render `identity.type = \"UserAssigned\"`."
-  }
-  assert {
-    condition     = length(azapi_resource.this.identity[0].identity_ids) == 1
-    error_message = "The user assigned identity resource ID must be attached."
-  }
-  assert {
     condition     = azapi_resource.this.timeouts.create == "10m"
     error_message = "`timeouts` must be forwarded to the AzAPI resource."
   }
@@ -162,29 +149,5 @@ run "complete_deployment" {
   assert {
     condition     = azapi_resource.role_assignments["reader"].body.properties.principalId == "00000000-0000-0000-0000-000000000001"
     error_message = "The role assignment principal ID must be forwarded."
-  }
-}
-
-run "system_assigned_identity" {
-  command = apply
-
-  variables {
-    managed_identities = {
-      system_assigned = true
-    }
-  }
-
-  assert {
-    condition     = azapi_resource.this.identity[0].type == "SystemAssigned"
-    error_message = "A system assigned identity must render `identity.type = \"SystemAssigned\"`."
-  }
-}
-
-run "no_identity_block_by_default" {
-  command = apply
-
-  assert {
-    condition     = length(azapi_resource.this.identity) == 0
-    error_message = "No identity block must be emitted when `managed_identities` is left at its default."
   }
 }

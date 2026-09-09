@@ -2,14 +2,11 @@ module "avm_interfaces" {
   source  = "Azure/avm-utl-interfaces/azure"
   version = "0.7.0"
 
-  enable_telemetry   = var.enable_telemetry
-  lock               = var.lock
-  managed_identities = var.managed_identities
-  # The role-definition lookup is scoped to the parent resource group rather than
-  # `azapi_resource.this.id`. Role definitions available at the alert rule are the
-  # same as those available at its resource group, and using `var.parent_id` keeps
-  # the module free of a dependency cycle between the interfaces module (which
-  # supplies the identity block) and the primary resource.
+  enable_telemetry = var.enable_telemetry
+  lock             = var.lock
+  # Role definitions available at the alert rule are the same as those available at
+  # its resource group, so the lookup is scoped to the parent and the interfaces
+  # module does not have to wait on the primary resource.
   role_assignment_definition_scope = var.parent_id
   role_assignments                 = var.role_assignments
 }
@@ -26,15 +23,6 @@ resource "azapi_resource" "this" {
   response_export_values = []
   retry                  = var.retry
   tags                   = var.tags
-
-  dynamic "identity" {
-    for_each = module.avm_interfaces.managed_identities_azapi != null ? [module.avm_interfaces.managed_identities_azapi] : []
-
-    content {
-      type         = identity.value.type
-      identity_ids = identity.value.identity_ids
-    }
-  }
 
   dynamic "timeouts" {
     for_each = var.timeouts == null ? [] : [var.timeouts]

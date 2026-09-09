@@ -255,35 +255,6 @@ DESCRIPTION
   }
 }
 
-variable "managed_identities" {
-  type = object({
-    system_assigned            = optional(bool, false)
-    user_assigned_resource_ids = optional(set(string), [])
-  })
-  default     = {}
-  description = <<DESCRIPTION
-Controls the Managed Identity configuration on this resource. The following properties can be specified:
-
-- `system_assigned` - (Optional) Specifies if the System Assigned Managed Identity should be enabled.
-- `user_assigned_resource_ids` - (Optional) Specifies a list of User Assigned Managed Identity resource IDs to be assigned to this resource.
-
-> Note: the `Microsoft.Insights/metricAlerts` ARM schema restricts `identity.type` to `SystemAssigned`, `UserAssigned` or `None`. The combined `SystemAssigned, UserAssigned` value is not accepted, so `system_assigned` and `user_assigned_resource_ids` are mutually exclusive on this resource type.
-DESCRIPTION
-  nullable    = false
-
-  validation {
-    condition = alltrue([
-      for id in var.managed_identities.user_assigned_resource_ids :
-      can(provider::azapi::parse_resource_id("Microsoft.ManagedIdentity/userAssignedIdentities", id))
-    ])
-    error_message = "Each entry in `managed_identities.user_assigned_resource_ids` must be a valid user-assigned managed identity resource ID."
-  }
-  validation {
-    condition     = !(var.managed_identities.system_assigned && length(var.managed_identities.user_assigned_resource_ids) > 0)
-    error_message = "`managed_identities.system_assigned` and `managed_identities.user_assigned_resource_ids` are mutually exclusive. `Microsoft.Insights/metricAlerts` only accepts an `identity.type` of `SystemAssigned`, `UserAssigned` or `None`."
-  }
-}
-
 variable "resource_types" {
   type = object({
     insights_metric_alerts         = optional(string, "Microsoft.Insights/metricAlerts@2026-01-01")

@@ -34,15 +34,11 @@ Several Azure Monitor rules are not expressible in the ARM schema. Each of the f
 - **Dimensions cannot be used on a rule with multiple criteria.** A rule with more than one entry across `static_criteria` and `dynamic_criteria` is rejected with `When the alert rule contains multiple criteria, the use of dimensions is limited to one value per dimension within each criterion`, even when every dimension carries a single concrete value. Use one criterion when you need dimensions.
 - **Multi-resource alerts are only supported for certain resource types.** More than one entry in `scopes` requires that the monitored resource type supports multi-resource metric alerts. `Microsoft.Storage/storageAccounts` is rejected with `Alerts are currently not supported with multi resource level`. The supported list is a service-side property that changes over time, so the module does not validate it.
 - **`custom_properties` is only accepted on `Query` kind rules.** Setting it on a metric criteria rule is rejected with `CustomProperties are currently supported for 'Query' kind Metric Alert rule only`.
-- **`managed_identities` is only accepted on query criteria.** Setting it on a metric criteria rule is rejected with `Managed Identity is not supported for non-query criterion`. Because this module implements the metric and web test criteria models, the identity block is currently unusable; the input is retained because the ARM schema supports it and it becomes usable if PromQL/query criteria are added.
+- **Managed identities are only accepted on query criteria.** Setting an `identity` block on a metric criteria rule is rejected with `Managed Identity is not supported for non-query criterion`. Because this module implements the metric and web test criteria models, the identity block is unusable on every configuration the module can produce, so the managed identities interface is not exposed. It becomes applicable only if PromQL/query criteria are added.
 
 ### Map keys versus Azure names
 
 `actions`, `static_criteria`, `dynamic_criteria` and `dimensions` are maps keyed by an arbitrary, stable string. The key is used only for Terraform identity and plan stability. The Azure-visible name always comes from the `name` attribute inside the object, which lets you rename a criterion in Azure without recreating unrelated entries, and vice versa.
-
-## Managed identities
-
-ARM restricts `identity.type` on this resource type to `SystemAssigned`, `UserAssigned` or `None`. The combined `SystemAssigned, UserAssigned` value is rejected by the service, so `var.managed_identities` validates that `system_assigned` and `user_assigned_resource_ids` are not used together.
 
 ## Example
 
@@ -96,6 +92,17 @@ import {
 
 `var.ignore_body_changes.insights_metric_alerts` accepts body-relative dot paths (for example `properties.description`) that AzAPI should ignore when it compares the configured body with the remote state. Use it when another system owns part of the rule.
 
+## Deleting a locked rule
+
+When `var.lock` is set, a single `terraform destroy` can fail with `ScopeLocked` even though Terraform correctly deletes the lock before the rule. Azure enforces management locks through a cache that is only eventually consistent, so the delete that immediately follows the lock removal can still be rejected:
+
+```text
+The scope '/subscriptions/.../metricAlerts/<name>' cannot perform delete operation
+because following scope(s) are locked. Please remove the lock and try again.
+```
+
+Re-running `terraform destroy` succeeds once the lock removal has propagated. This is service-side behaviour rather than a module defect, so the module does not add a delay or a destroy-time retry to mask it.
+
 ## Interfaces
 
 | Interface | Status | Rationale |
@@ -103,10 +110,10 @@ import {
 | Tags | Included | `Microsoft.Insights/metricAlerts` supports ARM tags. |
 | Resource locks | Included | The rule is a lockable ARM resource. |
 | Role assignments | Included | The rule is a valid RBAC scope. |
-| Managed identities | Included, but not usable today | The ARM schema exposes `identity`, but Azure Monitor rejects it for the metric and web test criteria this module implements. See the service constraints above. |
 | Telemetry | Included | Required by the AVM specification. |
 | `resource_types`, `retry`, `timeouts`, `ignore_body_changes` | Included | Required AzAPI control interfaces. |
 | Diagnostic settings | Excluded | The resource type exposes no diagnostic log or metric categories. |
+| Managed identities | Excluded | The ARM schema exposes `identity`, but Azure Monitor rejects it for the metric and web test criteria this module implements, so the interface would be a no-op. See the service constraints above. |
 | Customer managed keys | Excluded | The ARM schema exposes no encryption properties. |
 | Private endpoints | Excluded | The ARM schema exposes no `privateEndpointConnections`; the resource is a global control-plane object with no data-plane endpoint. |
 
@@ -340,26 +347,6 @@ object({
 
 Default: `null`
 
-### <a name="input_managed_identities"></a> [managed\_identities](#input\_managed\_identities)
-
-Description: Controls the Managed Identity configuration on this resource. The following properties can be specified:
-
-- `system_assigned` - (Optional) Specifies if the System Assigned Managed Identity should be enabled.
-- `user_assigned_resource_ids` - (Optional) Specifies a list of User Assigned Managed Identity resource IDs to be assigned to this resource.
-
-> Note: the `Microsoft.Insights/metricAlerts` ARM schema restricts `identity.type` to `SystemAssigned`, `UserAssigned` or `None`. The combined `SystemAssigned, UserAssigned` value is not accepted, so `system_assigned` and `user_assigned_resource_ids` are mutually exclusive on this resource type.
-
-Type:
-
-```hcl
-object({
-    system_assigned            = optional(bool, false)
-    user_assigned_resource_ids = optional(set(string), [])
-  })
-```
-
-Default: `{}`
-
 ### <a name="input_resource_types"></a> [resource\_types](#input\_resource\_types)
 
 Description: AzAPI resource types and API versions used by the module. Each key defaults to a tested value; supply only the keys you want to override. Useful when targeting a sovereign cloud with older API versions.
@@ -575,7 +562,6 @@ Description: The metric alert rule. The value is an object with the following at
 - `name` - The name of the metric alert rule.
 - `location` - The Azure region of the metric alert rule. Always `global`.
 - `tags` - The tags applied to the metric alert rule.
-- `identity` - The managed identity configuration of the metric alert rule.
 - `body` - The request body submitted to the Azure Monitor API.
 
 ### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
