@@ -6,6 +6,8 @@ This example deploys a metric alert rule that uses machine-learned dynamic thres
 
 Dynamic thresholds are only supported by the `Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria` model, so supplying any entry in `dynamic_criteria` makes the module select that criteria model automatically.
 
+Azure Monitor allows exactly one criterion on a dynamic alert rule, so this example supplies a single `dynamic_criteria` entry.
+
 ```hcl
 terraform {
   required_version = ">= 1.9, < 2.0"
@@ -70,6 +72,7 @@ resource "azapi_resource" "storage" {
 # Supplying `dynamic_criteria` makes the module select the
 # `Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria` model, which is
 # the only criteria model that supports machine-learned dynamic thresholds.
+# Azure Monitor allows exactly one criterion on a dynamic alert rule.
 module "metric_alert" {
   source = "../../"
 
@@ -86,15 +89,6 @@ module "metric_alert" {
       alert_sensitivity            = "Medium"
       number_of_evaluation_periods = 4
       min_failing_periods_to_alert = 3
-    }
-    ingress = {
-      name                         = "UnusualIngress"
-      metric_name                  = "Ingress"
-      aggregation                  = "Total"
-      operator                     = "GreaterThan"
-      alert_sensitivity            = "Low"
-      number_of_evaluation_periods = 6
-      min_failing_periods_to_alert = 2
       dimensions = {
         api_name = {
           name     = "ApiName"

@@ -50,9 +50,10 @@ run "dynamic_thresholds" {
   }
 }
 
-# Static and dynamic criteria can be combined in a single rule.
-run "mixed_static_and_dynamic_criteria" {
-  command = apply
+# Azure Monitor rejects a dynamic alert that carries more than one criterion, so
+# mixing static and dynamic criteria must fail the module precondition.
+run "static_and_dynamic_criteria_cannot_be_combined" {
+  command = plan
 
   variables {
     static_criteria = {
@@ -75,14 +76,33 @@ run "mixed_static_and_dynamic_criteria" {
     }
   }
 
-  assert {
-    condition     = length(azapi_resource.this.body.properties.criteria.allOf) == 2
-    error_message = "Static and dynamic criteria must both be rendered into `allOf`."
+  expect_failures = [azapi_resource.this]
+}
+
+# More than one dynamic criterion is rejected by the same service constraint.
+run "multiple_dynamic_criteria_are_rejected" {
+  command = plan
+
+  variables {
+    dynamic_criteria = {
+      ingress = {
+        name              = "UnusualIngress"
+        metric_name       = "Ingress"
+        aggregation       = "Total"
+        operator          = "GreaterThan"
+        alert_sensitivity = "Low"
+      }
+      egress = {
+        name              = "UnusualEgress"
+        metric_name       = "Egress"
+        aggregation       = "Total"
+        operator          = "GreaterThan"
+        alert_sensitivity = "Low"
+      }
+    }
   }
-  assert {
-    condition     = azapi_resource.this.body.properties.criteria["odata.type"] == "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
-    error_message = "Any dynamic criterion must select the multiple-resource criteria model."
-  }
+
+  expect_failures = [azapi_resource.this]
 }
 
 # Dimension include and exclude filters, with the Azure-visible dimension name

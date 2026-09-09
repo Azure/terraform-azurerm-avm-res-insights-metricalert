@@ -32,13 +32,12 @@ resource "azapi_resource" "rg" {
   response_export_values = []
 }
 
-# Two monitored storage accounts so that the alert rule uses the multi-resource
-# criteria model, which requires `target_resource_type` and `target_resource_region`.
+# Azure Monitor does not support multi-resource metric alerts for
+# `Microsoft.Storage/storageAccounts`, so this example scopes the rule to a single
+# storage account and uses the single-resource criteria model.
 resource "azapi_resource" "storage" {
-  for_each = toset(["a", "b"])
-
   location  = var.location
-  name      = "stavmmc${each.key}${random_string.suffix.result}"
+  name      = "stavmmc${random_string.suffix.result}"
   parent_id = azapi_resource.rg.id
   type      = "Microsoft.Storage/storageAccounts@2023-05-01"
   body = {
@@ -85,21 +84,13 @@ resource "azapi_resource" "action_group" {
   response_export_values = []
 }
 
-resource "azapi_resource" "user_assigned_identity" {
-  location               = var.location
-  name                   = "uai-avm-metricalert-${random_string.suffix.result}"
-  parent_id              = azapi_resource.rg.id
-  type                   = "Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31"
-  response_export_values = []
-}
-
 # This is the module call.
 module "metric_alert" {
   source = "../../"
 
   name      = "alert-storage-complete-${random_string.suffix.result}"
   parent_id = azapi_resource.rg.id
-  scopes    = [for s in azapi_resource.storage : s.id]
+  scopes    = [azapi_resource.storage.id]
   actions = {
     ops = {
       action_group_id = azapi_resource.action_group["ops"].id
@@ -111,11 +102,7 @@ module "metric_alert" {
       action_group_id = azapi_resource.action_group["oncall"].id
     }
   }
-  auto_mitigate = true
-  custom_properties = {
-    owner   = "platform-team"
-    service = "storage"
-  }
+  auto_mitigate        = true
   description          = "Alerts when storage transactions or availability breach the configured static thresholds."
   enable_telemetry     = var.enable_telemetry # see variables.tf
   enabled              = true
@@ -124,13 +111,11 @@ module "metric_alert" {
     kind  = "CanNotDelete"
     notes = "Managed by the AVM metric alert example."
   }
-  managed_identities = {
-    user_assigned_resource_ids = [azapi_resource.user_assigned_identity.id]
-  }
   severity = 2
   static_criteria = {
-    # Dimensions with the `Include` operator narrow the criterion to specific
-    # dimension values.
+    # Azure Monitor does not accept dimensions on a rule that carries more than
+    # one criterion, so this example uses a single criterion and exercises both
+    # the `Include` and `Exclude` dimension operators on it.
     transactions = {
       name        = "HighTransactionCount"
       metric_name = "Transactions"
@@ -143,16 +128,6 @@ module "metric_alert" {
           operator = "Include"
           values   = ["*"]
         }
-      }
-    }
-    # Dimensions with the `Exclude` operator drop specific dimension values.
-    availability = {
-      name        = "LowAvailability"
-      metric_name = "Availability"
-      aggregation = "Average"
-      operator    = "LessThan"
-      threshold   = 99.9
-      dimensions = {
         geo_type = {
           name     = "GeoType"
           operator = "Exclude"
@@ -165,8 +140,6 @@ module "metric_alert" {
     environment = "avm-example"
     scenario    = "complete"
   }
-  target_resource_region = var.location
-  target_resource_type   = "Microsoft.Storage/storageAccounts"
   timeouts = {
     create = "30m"
     delete = "30m"

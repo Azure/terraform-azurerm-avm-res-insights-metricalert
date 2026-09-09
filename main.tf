@@ -83,6 +83,13 @@ resource "azapi_resource" "this" {
       condition     = length(var.dynamic_criteria) == 0 || var.webtest_criteria == null
       error_message = "`dynamic_criteria` cannot be used with `webtest_criteria`. Dynamic thresholds are only supported by the multiple-resource metric criteria model."
     }
+    # Service-side constraint confirmed by E2E: Azure Monitor rejects a dynamic
+    # alert carrying more than one criterion, including a static/dynamic mix, with
+    # "Maximum 1 criteria is allowed when using dynamic alert".
+    precondition {
+      condition     = length(var.dynamic_criteria) == 0 || (length(var.dynamic_criteria) == 1 && length(var.static_criteria) == 0)
+      error_message = "A dynamic-threshold alert supports exactly one criterion. Supply a single `dynamic_criteria` entry and no `static_criteria`."
+    }
   }
 }
 
