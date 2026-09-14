@@ -100,11 +100,9 @@ locals {
       webHookProperties = v.webhook_properties
     }
   ]
-  # AzAPI validates the *configured* body against the schema of the API version
-  # pinned by `var.resource_types` before it strips null values, so an optional
-  # property must be absent rather than null. Merging each optional property in
-  # only when the consumer sets it keeps the module usable when an older API
-  # version is pinned, and keeps the request body free of meaningless nulls.
+  # Merging each optional property in only when the consumer sets it keeps the
+  # request body free of properties that an older API version pinned through
+  # `var.resource_types` may not define.
   metric_alert_properties = merge(
     {
       autoMitigate        = var.auto_mitigate
@@ -117,7 +115,6 @@ locals {
     },
     merge([for v in(var.action_properties == null ? [] : [var.action_properties]) : { actionProperties = v }]...),
     merge([for v in(length(var.actions) == 0 ? [] : [local.metric_alert_actions]) : { actions = v }]...),
-    merge([for v in(var.custom_properties == null ? [] : [var.custom_properties]) : { customProperties = v }]...),
     merge([for v in(var.description == null ? [] : [var.description]) : { description = v }]...),
     merge([for v in(var.target_resource_region == null ? [] : [var.target_resource_region]) : { targetResourceRegion = v }]...),
     merge([for v in(var.target_resource_type == null ? [] : [var.target_resource_type]) : { targetResourceType = v }]...),

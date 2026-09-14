@@ -77,12 +77,6 @@ variable "auto_mitigate" {
   nullable    = false
 }
 
-variable "custom_properties" {
-  type        = map(string)
-  default     = null
-  description = "(Optional) A map of custom properties carried on the fired alert payload. This maps to `Microsoft.Insights/metricAlerts.properties.customProperties`."
-}
-
 variable "description" {
   type        = string
   default     = null
@@ -153,11 +147,13 @@ DESCRIPTION
   validation {
     condition = alltrue([
       for _, v in var.dynamic_criteria :
+      v.number_of_evaluation_periods == floor(v.number_of_evaluation_periods) &&
+      v.min_failing_periods_to_alert == floor(v.min_failing_periods_to_alert) &&
       v.number_of_evaluation_periods >= 1 && v.number_of_evaluation_periods <= 6 &&
       v.min_failing_periods_to_alert >= 1 && v.min_failing_periods_to_alert <= 6 &&
       v.min_failing_periods_to_alert <= v.number_of_evaluation_periods
     ])
-    error_message = "Each `dynamic_criteria[*]` must set `number_of_evaluation_periods` and `min_failing_periods_to_alert` between 1 and 6, with `min_failing_periods_to_alert` less than or equal to `number_of_evaluation_periods`."
+    error_message = "Each `dynamic_criteria[*]` must set `number_of_evaluation_periods` and `min_failing_periods_to_alert` to whole numbers between 1 and 6, with `min_failing_periods_to_alert` less than or equal to `number_of_evaluation_periods`."
   }
   validation {
     condition = alltrue(flatten([
@@ -462,7 +458,7 @@ The Azure Monitor API models this criteria type as a single object rather than a
 
 - `web_test_id` - The fully-qualified ARM resource ID of the `Microsoft.Insights/webtests` resource.
 - `component_id` - The fully-qualified ARM resource ID of the `Microsoft.Insights/components` (Application Insights) resource.
-- `failed_location_count` - The number of failed locations required to raise the alert.
+- `failed_location_count` - The number of failed locations required to raise the alert. Must be a whole number of at least 1.
 DESCRIPTION
 
   validation {
@@ -474,8 +470,8 @@ DESCRIPTION
     error_message = "`webtest_criteria.component_id` must be a valid `Microsoft.Insights/components` resource ID."
   }
   validation {
-    condition     = var.webtest_criteria == null || try(var.webtest_criteria.failed_location_count, 0) >= 1
-    error_message = "`webtest_criteria.failed_location_count` must be at least 1."
+    condition     = var.webtest_criteria == null || (try(var.webtest_criteria.failed_location_count, 0) >= 1 && try(var.webtest_criteria.failed_location_count, 0) == floor(try(var.webtest_criteria.failed_location_count, 0)))
+    error_message = "`webtest_criteria.failed_location_count` must be a whole number of at least 1."
   }
 }
 

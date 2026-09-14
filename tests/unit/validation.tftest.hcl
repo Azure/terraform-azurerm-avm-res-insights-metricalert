@@ -124,6 +124,27 @@ run "invalid_dynamic_failing_periods" {
   expect_failures = [var.dynamic_criteria]
 }
 
+run "fractional_dynamic_failing_periods" {
+  command = plan
+
+  variables {
+    static_criteria = {}
+    dynamic_criteria = {
+      transactions = {
+        name                         = "UnusualTransactionVolume"
+        metric_name                  = "Transactions"
+        aggregation                  = "Total"
+        operator                     = "GreaterThan"
+        alert_sensitivity            = "Medium"
+        number_of_evaluation_periods = 4.5
+        min_failing_periods_to_alert = 2
+      }
+    }
+  }
+
+  expect_failures = [var.dynamic_criteria]
+}
+
 run "invalid_dimension_operator" {
   command = plan
 
@@ -267,6 +288,23 @@ run "webtest_criteria_cannot_be_combined_with_metric_criteria" {
   }
 
   expect_failures = [azapi_resource.this]
+}
+
+run "fractional_failed_location_count" {
+  command = plan
+
+  variables {
+    static_criteria        = {}
+    target_resource_type   = "Microsoft.Insights/webtests"
+    target_resource_region = "swedencentral"
+    webtest_criteria = {
+      web_test_id           = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit/providers/Microsoft.Insights/webtests/wt"
+      component_id          = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit/providers/Microsoft.Insights/components/appi"
+      failed_location_count = 1.5
+    }
+  }
+
+  expect_failures = [var.webtest_criteria]
 }
 
 run "duplicate_criterion_names" {

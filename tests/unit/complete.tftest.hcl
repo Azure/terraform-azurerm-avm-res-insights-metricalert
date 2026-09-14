@@ -63,10 +63,7 @@ run "complete_deployment" {
     action_properties = {
       "Email.Subject" = "Storage availability degraded"
     }
-    auto_mitigate = false
-    custom_properties = {
-      team = "platform"
-    }
+    auto_mitigate        = false
     description          = "Complete unit test coverage of the metric alert module."
     enabled              = true
     evaluation_frequency = "PT5M"
@@ -105,10 +102,6 @@ run "complete_deployment" {
   assert {
     condition     = azapi_resource.this.body.properties.autoMitigate == false
     error_message = "`auto_mitigate` must be sent to Azure."
-  }
-  assert {
-    condition     = azapi_resource.this.body.properties.customProperties.team == "platform"
-    error_message = "`custom_properties` must be rendered as `customProperties`."
   }
   assert {
     condition     = azapi_resource.this.body.properties.actionProperties["Email.Subject"] == "Storage availability degraded"
