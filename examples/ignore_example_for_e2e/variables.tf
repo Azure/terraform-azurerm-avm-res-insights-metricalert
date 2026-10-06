@@ -7,3 +7,9 @@ For more information see <https://aka.ms/avm/telemetryinfo>.
 If it is set to false, then no telemetry will be collected.
 DESCRIPTION
 }
+
+variable "location" {
+  type        = string
+  default     = "swedencentral"
+  description = "The Azure region used for the supporting resources deployed by this example. The metric alert rule itself is always global."
+}

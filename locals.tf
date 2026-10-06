@@ -1,34 +1,122 @@
-# TODO: insert locals here.
 locals {
-  managed_identities = {
-    system_assigned_user_assigned = (var.managed_identities.system_assigned || length(var.managed_identities.user_assigned_resource_ids) > 0) ? {
-      this = {
-        type                       = var.managed_identities.system_assigned && length(var.managed_identities.user_assigned_resource_ids) > 0 ? "SystemAssigned, UserAssigned" : length(var.managed_identities.user_assigned_resource_ids) > 0 ? "UserAssigned" : "SystemAssigned"
-        user_assigned_resource_ids = var.managed_identities.user_assigned_resource_ids
+  # The Azure Monitor `criteria` property is an ARM discriminated object keyed on
+  # `odata.type`. AzAPI validates the configured body against the schema of the
+  # selected variant, so keys that belong to the other variant must be absent
+  # rather than null. The `merge([for ...]...)` form emits a partial object only
+  # when the variant is selected and avoids Terraform having to unify two
+  # different object types in a conditional expression.
+  criteria = merge(
+    { "odata.type" = local.criteria_odata_type },
+    local.criteria_part_metric,
+    local.criteria_part_webtest,
+  )
+  criteria_dynamic = [
+    for k, v in var.dynamic_criteria : {
+      criterionType    = "DynamicThresholdCriterion"
+      name             = v.name
+      metricName       = v.metric_name
+      metricNamespace  = v.metric_namespace
+      timeAggregation  = v.aggregation
+      operator         = v.operator
+      alertSensitivity = v.alert_sensitivity
+      failingPeriods = {
+        numberOfEvaluationPeriods = v.number_of_evaluation_periods
+        minFailingPeriodsToAlert  = v.min_failing_periods_to_alert
       }
-    } : {}
-    system_assigned = var.managed_identities.system_assigned ? {
-      this = {
-        type = "SystemAssigned"
-      }
-    } : {}
-    user_assigned = length(var.managed_identities.user_assigned_resource_ids) > 0 ? {
-      this = {
-        type                       = "UserAssigned"
-        user_assigned_resource_ids = var.managed_identities.user_assigned_resource_ids
-      }
-    } : {}
-  }
-  # Private endpoint application security group associations.
-  # We merge the nested maps from private endpoints and application security group associations into a single map.
-  private_endpoint_application_security_group_associations = { for assoc in flatten([
-    for pe_k, pe_v in var.private_endpoints : [
-      for asg_k, asg_v in pe_v.application_security_group_associations : {
-        asg_key         = asg_k
-        pe_key          = pe_k
-        asg_resource_id = asg_v
-      }
-    ]
-  ]) : "${assoc.pe_key}-${assoc.asg_key}" => assoc }
-  role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
+      ignoreDataBefore     = v.ignore_data_before
+      skipMetricValidation = v.skip_metric_validation
+      dimensions = length(v.dimensions) > 0 ? [
+        for dk, dv in v.dimensions : {
+          name     = dv.name
+          operator = dv.operator
+          values   = tolist(dv.values)
+        }
+      ] : null
+    }
+  ]
+  # Every Azure-visible criterion name across both criteria maps, used by the
+  # uniqueness precondition in `main.tf`.
+  criteria_names = concat(
+    [for k, v in var.static_criteria : v.name],
+    [for k, v in var.dynamic_criteria : v.name],
+  )
+  # Dynamic thresholds and multi-resource scopes are only supported by the
+  # multiple-resource criteria model. Single-resource static alerts keep the
+  # narrower model so that the Azure portal renders them as classic metric alerts.
+  criteria_odata_type = (
+    var.webtest_criteria != null
+    ? "Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria"
+    : (
+      length(var.dynamic_criteria) > 0 || length(var.scopes) > 1 || var.target_resource_type != null
+      ? "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+      : "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
+    )
+  )
+  # `allOf` is only present for the metric criteria variants. Map iteration is in
+  # lexical key order, so the rendered list is stable across plans.
+  criteria_part_metric = merge([
+    for _ in(var.webtest_criteria == null ? [true] : []) : {
+      allOf = concat(local.criteria_static, local.criteria_dynamic)
+    }
+  ]...)
+  criteria_part_webtest = merge([
+    for c in(var.webtest_criteria == null ? [] : [var.webtest_criteria]) : {
+      webTestId           = c.web_test_id
+      componentId         = c.component_id
+      failedLocationCount = c.failed_location_count
+    }
+  ]...)
+  criteria_static = [
+    for k, v in var.static_criteria : {
+      criterionType        = "StaticThresholdCriterion"
+      name                 = v.name
+      metricName           = v.metric_name
+      metricNamespace      = v.metric_namespace
+      timeAggregation      = v.aggregation
+      operator             = v.operator
+      threshold            = v.threshold
+      skipMetricValidation = v.skip_metric_validation
+      dimensions = length(v.dimensions) > 0 ? [
+        for dk, dv in v.dimensions : {
+          name     = dv.name
+          operator = dv.operator
+          values   = tolist(dv.values)
+        }
+      ] : null
+    }
+  ]
+  # Azure-visible dimension names grouped per criterion, used by the uniqueness
+  # precondition in `main.tf`.
+  dimension_name_sets = concat(
+    [for k, v in var.static_criteria : [for dk, dv in v.dimensions : dv.name]],
+    [for k, v in var.dynamic_criteria : [for dk, dv in v.dimensions : dv.name]],
+  )
+  # The lock name is optional on the AVM interface; fall back to the AVM
+  # convention of `lock-<kind>` when the consumer does not supply one.
+  lock_name = var.lock == null ? null : coalesce(var.lock.name, "lock-${var.lock.kind}")
+  metric_alert_actions = [
+    for k, v in var.actions : {
+      actionGroupId     = v.action_group_id
+      webHookProperties = v.webhook_properties
+    }
+  ]
+  # Merging each optional property in only when the consumer sets it keeps the
+  # request body free of properties that an older API version pinned through
+  # `var.resource_types` may not define.
+  metric_alert_properties = merge(
+    {
+      autoMitigate        = var.auto_mitigate
+      criteria            = local.criteria
+      enabled             = var.enabled
+      evaluationFrequency = var.evaluation_frequency
+      scopes              = tolist(var.scopes)
+      severity            = var.severity
+      windowSize          = var.window_size
+    },
+    merge([for v in(var.action_properties == null ? [] : [var.action_properties]) : { actionProperties = v }]...),
+    merge([for v in(length(var.actions) == 0 ? [] : [local.metric_alert_actions]) : { actions = v }]...),
+    merge([for v in(var.description == null ? [] : [var.description]) : { description = v }]...),
+    merge([for v in(var.target_resource_region == null ? [] : [var.target_resource_region]) : { targetResourceRegion = v }]...),
+    merge([for v in(var.target_resource_type == null ? [] : [var.target_resource_type]) : { targetResourceType = v }]...),
+  )
 }
