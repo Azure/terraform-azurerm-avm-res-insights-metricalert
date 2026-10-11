@@ -125,6 +125,7 @@ module "metric_alert" {
   description            = "Alerts when the web test fails from more than one location."
   enable_telemetry       = var.enable_telemetry # see variables.tf
   evaluation_frequency   = "PT1M"
+  location               = "global"
   severity               = 1
   target_resource_region = var.location
   target_resource_type   = "Microsoft.Insights/webtests"

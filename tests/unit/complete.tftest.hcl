@@ -71,6 +71,11 @@ run "complete_deployment" {
       kind  = "CanNotDelete"
       notes = "protected"
     }
+    retry = {
+      error_message_regex  = ["ScopeLocked"]
+      interval_seconds     = 15
+      max_interval_seconds = 60
+    }
     role_assignments = {
       reader = {
         role_definition_id_or_name = "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7"
@@ -84,7 +89,7 @@ run "complete_deployment" {
     }
     timeouts = {
       create = "10m"
-      delete = "10m"
+      delete = "5m"
       read   = "5m"
       update = "10m"
     }
@@ -114,6 +119,19 @@ run "complete_deployment" {
   assert {
     condition     = azapi_resource.this.timeouts.create == "10m"
     error_message = "`timeouts` must be forwarded to the AzAPI resource."
+  }
+  assert {
+    condition = (
+      length(azapi_resource.this.retry.error_message_regex) == 1 &&
+      contains(azapi_resource.this.retry.error_message_regex, "ScopeLocked") &&
+      azapi_resource.this.retry.interval_seconds == 15 &&
+      azapi_resource.this.retry.max_interval_seconds == 60
+    )
+    error_message = "The alert must preserve the configured lock-propagation retry and backoff."
+  }
+  assert {
+    condition     = azapi_resource.this.timeouts.delete == "5m"
+    error_message = "Deletion retries must remain bounded by the configured five-minute timeout."
   }
   assert {
     condition     = length(azapi_resource.lock) == 1

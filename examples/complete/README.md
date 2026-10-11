@@ -116,9 +116,15 @@ module "metric_alert" {
   enable_telemetry     = var.enable_telemetry # see variables.tf
   enabled              = true
   evaluation_frequency = "PT5M"
+  location             = "global"
   lock = {
     kind  = "CanNotDelete"
     notes = "Managed by the AVM metric alert example."
+  }
+  retry = {
+    error_message_regex  = ["ScopeLocked"]
+    interval_seconds     = 15
+    max_interval_seconds = 60
   }
   severity = 2
   static_criteria = {
@@ -151,7 +157,7 @@ module "metric_alert" {
   }
   timeouts = {
     create = "30m"
-    delete = "30m"
+    delete = "5m"
   }
   window_size = "PT15M"
 }
