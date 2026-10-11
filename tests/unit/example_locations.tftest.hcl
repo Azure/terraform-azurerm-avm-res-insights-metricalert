@@ -37,6 +37,7 @@ run "complete_keeps_global_alert_location" {
     condition     = module.metric_alert.resource.location == "global" && azapi_resource.rg.location == var.location
     error_message = "The alert must remain global while supporting resources use the example region."
   }
+
 }
 
 run "dynamic_threshold_keeps_global_alert_location" {
