@@ -1,6 +1,16 @@
-mock_provider "azapi" {}
+mock_provider "azapi" {
+  mock_data "azapi_client_config" {
+    defaults = {
+      subscription_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000"
+    }
+  }
+}
+
 mock_provider "modtm" {}
+
 mock_provider "random" {}
+
+mock_provider "terraform" {}
 
 variables {
   name             = "alert-unit-basic"
@@ -79,8 +89,14 @@ run "basic_deployment" {
     error_message = "No role assignments must be created when `var.role_assignments` is empty."
   }
   assert {
-    condition     = length(modtm_telemetry.telemetry) == 0
+    condition     = length(azapi_resource.telemetry) == 0
     error_message = "Telemetry must not be collected when `enable_telemetry` is false."
+  }
+  providers = {
+    azapi     = azapi
+    modtm     = modtm
+    random    = random
+    terraform = terraform
   }
 }
 
@@ -100,6 +116,12 @@ run "outputs" {
     condition     = output.resource.id == azapi_resource.this.id && output.resource.location == "global"
     error_message = "`resource` must expose the alert rule object."
   }
+  providers = {
+    azapi     = azapi
+    modtm     = modtm
+    random    = random
+    terraform = terraform
+  }
 }
 
 # A disabled rule still renders `enabled = false` rather than omitting the property.
@@ -114,6 +136,12 @@ run "disabled_rule" {
     condition     = azapi_resource.this.body.properties.enabled == false
     error_message = "`enabled = false` must be sent to Azure."
   }
+  providers = {
+    azapi     = azapi
+    modtm     = modtm
+    random    = random
+    terraform = terraform
+  }
 }
 
 # `ignore_body_changes` collapses an empty list to null so the module remains
@@ -126,6 +154,12 @@ run "ignore_body_changes_default_is_empty" {
   assert {
     condition     = length(var.ignore_body_changes.insights_metric_alerts) == 0
     error_message = "`ignore_body_changes.insights_metric_alerts` must default to an empty list."
+  }
+  providers = {
+    azapi     = azapi
+    modtm     = modtm
+    random    = random
+    terraform = terraform
   }
 }
 
@@ -142,6 +176,12 @@ run "ignore_body_changes_supplied" {
     condition     = one(var.ignore_body_changes.insights_metric_alerts) == "properties.description"
     error_message = "`ignore_body_changes.insights_metric_alerts` must accept body-relative dot paths."
   }
+  providers = {
+    azapi     = azapi
+    modtm     = modtm
+    random    = random
+    terraform = terraform
+  }
 }
 
 # `resource_types` allows consumers to pin a different API version.
@@ -157,5 +197,11 @@ run "resource_types_override" {
   assert {
     condition     = azapi_resource.this.type == "Microsoft.Insights/metricAlerts@2018-03-01"
     error_message = "`resource_types.insights_metric_alerts` must override the API version."
+  }
+  providers = {
+    azapi     = azapi
+    modtm     = modtm
+    random    = random
+    terraform = terraform
   }
 }

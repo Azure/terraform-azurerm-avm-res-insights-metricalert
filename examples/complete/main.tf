@@ -6,6 +6,10 @@ terraform {
       source  = "Azure/azapi"
       version = "~> 2.12"
     }
+    modtm = {
+      source  = "registry.terraform.io/azure/modtm"
+      version = "~> 0.3"
+    }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.5"
@@ -86,7 +90,8 @@ resource "azapi_resource" "action_group" {
 
 # This is the module call.
 module "metric_alert" {
-  source = "../../"
+  source    = "../../"
+  providers = { modtm = modtm }
 
   name      = "alert-storage-complete-${random_string.suffix.result}"
   parent_id = azapi_resource.rg.id

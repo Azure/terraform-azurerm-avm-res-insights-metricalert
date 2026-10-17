@@ -1,5 +1,6 @@
 terraform {
   required_version = ">= 1.9, < 2.0"
+
   required_providers {
     azapi = {
       source                = "Azure/azapi"
@@ -14,6 +15,9 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.5"
     }
+    terraform = {
+      source = "terraform.io/builtin/terraform"
+    }
   }
 }
 
@@ -21,14 +25,16 @@ terraform {
 # aliased AzAPI provider. The module itself declares no provider configuration.
 module "test" {
   source = "../../../"
-
   providers = {
-    azapi = azapi.alternate
+    azapi     = azapi.alternate
+    modtm     = modtm
+    terraform = terraform
   }
 
-  name      = "alert-unit-aliased-provider"
-  parent_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit"
-  scopes    = ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit/providers/Microsoft.Storage/storageAccounts/stunit"]
+  name             = "alert-unit-aliased-provider"
+  parent_id        = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit"
+  scopes           = ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit/providers/Microsoft.Storage/storageAccounts/stunit"]
+  enable_telemetry = false
   static_criteria = {
     transactions = {
       name        = "HighTransactionCount"
@@ -38,15 +44,4 @@ module "test" {
       threshold   = 100
     }
   }
-  enable_telemetry = false
-}
-
-output "name" {
-  description = "The name of the metric alert rule created through an aliased AzAPI provider."
-  value       = module.test.name
-}
-
-output "resource_id" {
-  description = "The resource ID of the metric alert rule created through an aliased AzAPI provider."
-  value       = module.test.resource_id
 }

@@ -1,6 +1,16 @@
-mock_provider "azapi" {}
+mock_provider "azapi" {
+  mock_data "azapi_client_config" {
+    defaults = {
+      subscription_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000"
+    }
+  }
+}
+
 mock_provider "modtm" {}
+
 mock_provider "random" {}
+
+mock_provider "terraform" {}
 
 # The AVM interfaces module looks role definitions up by name. This module under
 # test always supplies fully qualified role definition IDs, so the lookup result
@@ -160,5 +170,11 @@ run "complete_deployment" {
   assert {
     condition     = azapi_resource.role_assignments["reader"].body.properties.principalId == "00000000-0000-0000-0000-000000000001"
     error_message = "The role assignment principal ID must be forwarded."
+  }
+  providers = {
+    azapi     = azapi
+    modtm     = modtm
+    random    = random
+    terraform = terraform
   }
 }
