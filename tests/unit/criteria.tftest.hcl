@@ -1,5 +1,11 @@
-mock_provider "azapi" {}
-mock_provider "modtm" {}
+mock_provider "azapi" {
+  mock_data "azapi_client_config" {
+    defaults = {
+      subscription_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000"
+    }
+  }
+}
+
 mock_provider "random" {}
 
 variables {
@@ -48,6 +54,10 @@ run "dynamic_thresholds" {
     condition     = azapi_resource.this.body.properties.criteria.allOf[0].failingPeriods.minFailingPeriodsToAlert == 3
     error_message = "`min_failing_periods_to_alert` must be rendered as `failingPeriods.minFailingPeriodsToAlert`."
   }
+  providers = {
+    azapi  = azapi
+    random = random
+  }
 }
 
 # Azure Monitor rejects a dynamic alert that carries more than one criterion, so
@@ -77,6 +87,10 @@ run "static_and_dynamic_criteria_cannot_be_combined" {
   }
 
   expect_failures = [azapi_resource.this]
+  providers = {
+    azapi  = azapi
+    random = random
+  }
 }
 
 # More than one dynamic criterion is rejected by the same service constraint.
@@ -103,6 +117,10 @@ run "multiple_dynamic_criteria_are_rejected" {
   }
 
   expect_failures = [azapi_resource.this]
+  providers = {
+    azapi  = azapi
+    random = random
+  }
 }
 
 # Dimension include and exclude filters, with the Azure-visible dimension name
@@ -150,6 +168,10 @@ run "dimension_include_and_exclude" {
     condition     = azapi_resource.this.body.properties.criteria.allOf[0].dimensions[1].operator == "Exclude"
     error_message = "The `Exclude` dimension operator must be preserved."
   }
+  providers = {
+    azapi  = azapi
+    random = random
+  }
 }
 
 # Multiple scopes require the target resource type and region and select the
@@ -191,6 +213,10 @@ run "multiple_scopes" {
     condition     = azapi_resource.this.body.properties.targetResourceRegion == "swedencentral"
     error_message = "`target_resource_region` must be sent to Azure."
   }
+  providers = {
+    azapi  = azapi
+    random = random
+  }
 }
 
 # Web test availability criteria are a single ARM object, so `allOf` must be absent.
@@ -222,6 +248,10 @@ run "webtest_criteria" {
   assert {
     condition     = !can(azapi_resource.this.body.properties.criteria.allOf)
     error_message = "`allOf` must be absent for the web test availability criteria model."
+  }
+  providers = {
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -263,5 +293,9 @@ run "multiple_action_groups" {
   assert {
     condition     = azapi_resource.this.body.properties.actions[0].webHookProperties.runbook == "storage-availability"
     error_message = "`webhook_properties` must be rendered as `webHookProperties`."
+  }
+  providers = {
+    azapi  = azapi
+    random = random
   }
 }

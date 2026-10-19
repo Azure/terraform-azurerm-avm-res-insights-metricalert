@@ -1,5 +1,11 @@
-mock_provider "azapi" {}
-mock_provider "modtm" {}
+mock_provider "azapi" {
+  mock_data "azapi_client_config" {
+    defaults = {
+      subscription_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000"
+    }
+  }
+}
+
 mock_provider "random" {}
 
 variables {
@@ -25,12 +31,16 @@ run "telemetry_enabled" {
   }
 
   assert {
-    condition     = length(modtm_telemetry.telemetry) == 1
+    condition     = length(azapi_resource.telemetry) == 1
     error_message = "Telemetry must be collected when `enable_telemetry` is true."
   }
   assert {
-    condition     = length(random_uuid.telemetry) == 1
+    condition     = length(terraform_data.telemetry) == 1
     error_message = "A telemetry correlation UUID must be generated when telemetry is enabled."
+  }
+  providers = {
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -42,11 +52,15 @@ run "telemetry_disabled" {
   }
 
   assert {
-    condition     = length(modtm_telemetry.telemetry) == 0
+    condition     = length(azapi_resource.telemetry) == 0
     error_message = "Telemetry must not be collected when `enable_telemetry` is false."
   }
   assert {
-    condition     = length(random_uuid.telemetry) == 0
+    condition     = length(terraform_data.telemetry) == 0
     error_message = "No telemetry correlation UUID must be generated when telemetry is disabled."
+  }
+  providers = {
+    azapi  = azapi
+    random = random
   }
 }
