@@ -1,14 +1,11 @@
 terraform {
   required_version = ">= 1.9, < 2.0"
+
   required_providers {
     azapi = {
       source                = "Azure/azapi"
       version               = "~> 2.12"
       configuration_aliases = [azapi.alternate]
-    }
-    modtm = {
-      source  = "azure/modtm"
-      version = "~> 0.3"
     }
     random = {
       source  = "hashicorp/random"
@@ -21,14 +18,14 @@ terraform {
 # aliased AzAPI provider. The module itself declares no provider configuration.
 module "test" {
   source = "../../../"
-
   providers = {
     azapi = azapi.alternate
   }
 
-  name      = "alert-unit-aliased-provider"
-  parent_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit"
-  scopes    = ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit/providers/Microsoft.Storage/storageAccounts/stunit"]
+  name             = "alert-unit-aliased-provider"
+  parent_id        = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit"
+  scopes           = ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit/providers/Microsoft.Storage/storageAccounts/stunit"]
+  enable_telemetry = false
   static_criteria = {
     transactions = {
       name        = "HighTransactionCount"
@@ -38,7 +35,6 @@ module "test" {
       threshold   = 100
     }
   }
-  enable_telemetry = false
 }
 
 output "name" {

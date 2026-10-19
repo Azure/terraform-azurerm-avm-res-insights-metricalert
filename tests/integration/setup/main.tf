@@ -12,13 +12,6 @@ terraform {
   }
 }
 
-variable "location" {
-  type        = string
-  default     = "swedencentral"
-  description = "The Azure region used for the supporting resources."
-  nullable    = false
-}
-
 data "azapi_client_config" "current" {}
 
 resource "random_string" "suffix" {
