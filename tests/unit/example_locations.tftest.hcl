@@ -7,8 +7,6 @@ mock_provider "azapi" {
   }
 }
 
-mock_provider "modtm" {}
-
 mock_provider "random" {}
 
 mock_provider "terraform" {}
@@ -30,7 +28,6 @@ run "default_keeps_global_alert_location" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -50,7 +47,6 @@ run "complete_keeps_global_alert_location" {
 
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -69,7 +65,6 @@ run "dynamic_threshold_keeps_global_alert_location" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -88,7 +83,6 @@ run "webtest_keeps_global_alert_location" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }

@@ -6,8 +6,6 @@ mock_provider "azapi" {
   }
 }
 
-mock_provider "modtm" {}
-
 mock_provider "random" {}
 
 mock_provider "terraform" {}
@@ -94,7 +92,6 @@ run "basic_deployment" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -118,7 +115,6 @@ run "outputs" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -138,7 +134,6 @@ run "disabled_rule" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -157,7 +152,6 @@ run "ignore_body_changes_default_is_empty" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -178,7 +172,6 @@ run "ignore_body_changes_supplied" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -200,7 +193,6 @@ run "resource_types_override" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }

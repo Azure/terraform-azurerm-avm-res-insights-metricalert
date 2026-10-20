@@ -6,8 +6,6 @@ mock_provider "azapi" {
   }
 }
 
-mock_provider "modtm" {}
-
 mock_provider "random" {}
 
 mock_provider "terraform" {}
@@ -60,7 +58,6 @@ run "dynamic_thresholds" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -95,7 +92,6 @@ run "static_and_dynamic_criteria_cannot_be_combined" {
   expect_failures = [azapi_resource.this]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -127,7 +123,6 @@ run "multiple_dynamic_criteria_are_rejected" {
   expect_failures = [azapi_resource.this]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -180,7 +175,6 @@ run "dimension_include_and_exclude" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -227,7 +221,6 @@ run "multiple_scopes" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -265,7 +258,6 @@ run "webtest_criteria" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -312,7 +304,6 @@ run "multiple_action_groups" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }

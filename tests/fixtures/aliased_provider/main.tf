@@ -7,10 +7,6 @@ terraform {
       version               = "~> 2.12"
       configuration_aliases = [azapi.alternate]
     }
-    modtm = {
-      source  = "azure/modtm"
-      version = "~> 0.3"
-    }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.5"
@@ -27,7 +23,6 @@ module "test" {
   source = "../../../"
   providers = {
     azapi     = azapi.alternate
-    modtm     = modtm
     terraform = terraform
   }
 

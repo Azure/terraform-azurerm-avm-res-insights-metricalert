@@ -131,8 +131,6 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.12)
 
-- <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
-
 ## Resources
 
 The following resources are used by this module:
@@ -565,7 +563,7 @@ The following Modules are called:
 
 Source: Azure/avm-utl-interfaces/azure
 
-Version: 0.7.0
+Version: 0.9.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

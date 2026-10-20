@@ -6,8 +6,6 @@ mock_provider "azapi" {
   }
 }
 
-mock_provider "modtm" {}
-
 mock_provider "random" {}
 
 mock_provider "terraform" {}
@@ -38,7 +36,6 @@ run "invalid_severity" {
   expect_failures = [var.severity]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -54,7 +51,6 @@ run "empty_scopes" {
   expect_failures = [var.scopes]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -70,7 +66,6 @@ run "invalid_scope_id" {
   expect_failures = [var.scopes]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -94,7 +89,6 @@ run "invalid_static_aggregation" {
   expect_failures = [var.static_criteria]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -118,7 +112,6 @@ run "invalid_static_operator" {
   expect_failures = [var.static_criteria]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -143,7 +136,6 @@ run "invalid_dynamic_operator" {
   expect_failures = [var.dynamic_criteria]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -170,7 +162,6 @@ run "invalid_dynamic_failing_periods" {
   expect_failures = [var.dynamic_criteria]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -197,7 +188,6 @@ run "fractional_dynamic_failing_periods" {
   expect_failures = [var.dynamic_criteria]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -228,7 +218,6 @@ run "invalid_dimension_operator" {
   expect_failures = [var.static_criteria]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -259,7 +248,6 @@ run "missing_dimension_values" {
   expect_failures = [var.static_criteria]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -275,7 +263,6 @@ run "invalid_evaluation_frequency" {
   expect_failures = [var.evaluation_frequency]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -292,7 +279,6 @@ run "window_size_smaller_than_evaluation_frequency" {
   expect_failures = [var.window_size]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -312,7 +298,6 @@ run "invalid_action_group_id" {
   expect_failures = [var.actions]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -332,7 +317,6 @@ run "empty_action_group_id" {
   expect_failures = [var.actions]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -348,7 +332,6 @@ run "invalid_target_resource_type" {
   expect_failures = [var.target_resource_type]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -364,7 +347,6 @@ run "invalid_location" {
   expect_failures = [var.location]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -380,7 +362,6 @@ run "no_criteria_supplied" {
   expect_failures = [azapi_resource.this]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -402,7 +383,6 @@ run "webtest_criteria_cannot_be_combined_with_metric_criteria" {
   expect_failures = [azapi_resource.this]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -425,7 +405,6 @@ run "fractional_failed_location_count" {
   expect_failures = [var.webtest_criteria]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -456,7 +435,6 @@ run "duplicate_criterion_names" {
   expect_failures = [azapi_resource.this]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -475,7 +453,6 @@ run "multiple_scopes_require_target_resource_type_and_region" {
   expect_failures = [azapi_resource.this]
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }

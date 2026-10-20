@@ -6,8 +6,6 @@ mock_provider "azapi" {
   }
 }
 
-mock_provider "modtm" {}
-
 mock_provider "random" {}
 
 mock_provider "terraform" {}
@@ -55,7 +53,6 @@ run "telemetry_enabled" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }
@@ -82,7 +79,6 @@ run "telemetry_disabled" {
   }
   providers = {
     azapi     = azapi
-    modtm     = modtm
     random    = random
     terraform = terraform
   }

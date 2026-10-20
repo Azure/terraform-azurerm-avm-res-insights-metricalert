@@ -20,8 +20,6 @@ mock_provider "azapi" {
   }
 }
 
-mock_provider "modtm" {}
-
 mock_provider "random" {}
 
 mock_provider "terraform" {}
@@ -66,7 +64,6 @@ run "aliased_azapi_provider" {
   providers = {
     azapi           = azapi
     azapi.alternate = azapi.alternate
-    modtm           = modtm
     random          = random
     terraform       = terraform
   }
