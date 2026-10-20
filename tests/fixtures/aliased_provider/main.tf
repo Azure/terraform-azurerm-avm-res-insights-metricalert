@@ -22,8 +22,7 @@ terraform {
 module "test" {
   source = "../../../"
   providers = {
-    azapi     = azapi.alternate
-    terraform = terraform
+    azapi = azapi.alternate
   }
 
   name             = "alert-unit-aliased-provider"
