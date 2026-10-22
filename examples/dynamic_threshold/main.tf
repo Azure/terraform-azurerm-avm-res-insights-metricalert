@@ -64,9 +64,6 @@ resource "azapi_resource" "storage" {
 # Azure Monitor allows exactly one criterion on a dynamic alert rule.
 module "metric_alert" {
   source = "../../"
-  providers = {
-    azapi = azapi
-  }
 
   name        = "alert-storage-dynamic-${random_string.suffix.result}"
   parent_id   = azapi_resource.rg.id

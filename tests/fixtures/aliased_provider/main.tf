@@ -7,6 +7,7 @@ terraform {
       version               = "~> 2.12"
       configuration_aliases = [azapi.alternate]
     }
+    # tflint-ignore: terraform_unused_required_providers
     random = {
       source  = "hashicorp/random"
       version = "~> 3.5"

@@ -106,9 +106,6 @@ resource "azapi_resource" "webtest" {
 # `dynamic_criteria`.
 module "metric_alert" {
   source = "../../"
-  providers = {
-    azapi = azapi
-  }
 
   name      = "alert-webtest-${random_string.suffix.result}"
   parent_id = azapi_resource.rg.id
