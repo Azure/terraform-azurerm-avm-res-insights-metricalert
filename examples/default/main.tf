@@ -63,9 +63,6 @@ resource "azapi_resource" "storage" {
 # This is the module call.
 module "metric_alert" {
   source = "../../"
-  providers = {
-    azapi = azapi
-  }
 
   name             = "alert-storage-transactions-${random_string.suffix.result}"
   parent_id        = azapi_resource.rg.id
