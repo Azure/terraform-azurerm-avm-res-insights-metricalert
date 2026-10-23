@@ -6,7 +6,10 @@ mock_provider "azapi" {
     }
   }
 }
+
 mock_provider "random" {}
+
+mock_provider "terraform" {}
 
 variables {
   location = "westeurope"
@@ -23,6 +26,11 @@ run "default_keeps_global_alert_location" {
     condition     = module.metric_alert.resource.location == "global" && azapi_resource.rg.location == var.location
     error_message = "The alert must remain global while supporting resources use the example region."
   }
+  providers = {
+    azapi     = azapi
+    random    = random
+    terraform = terraform
+  }
 }
 
 run "complete_keeps_global_alert_location" {
@@ -37,6 +45,11 @@ run "complete_keeps_global_alert_location" {
     error_message = "The alert must remain global while supporting resources use the example region."
   }
 
+  providers = {
+    azapi     = azapi
+    random    = random
+    terraform = terraform
+  }
 }
 
 run "dynamic_threshold_keeps_global_alert_location" {
@@ -50,6 +63,11 @@ run "dynamic_threshold_keeps_global_alert_location" {
     condition     = module.metric_alert.resource.location == "global" && azapi_resource.rg.location == var.location
     error_message = "The alert must remain global while supporting resources use the example region."
   }
+  providers = {
+    azapi     = azapi
+    random    = random
+    terraform = terraform
+  }
 }
 
 run "webtest_keeps_global_alert_location" {
@@ -62,5 +80,10 @@ run "webtest_keeps_global_alert_location" {
   assert {
     condition     = module.metric_alert.resource.location == "global" && azapi_resource.rg.location == var.location
     error_message = "The alert must remain global while supporting resources use the example region."
+  }
+  providers = {
+    azapi     = azapi
+    random    = random
+    terraform = terraform
   }
 }

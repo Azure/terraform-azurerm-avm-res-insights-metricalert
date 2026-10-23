@@ -8,6 +8,8 @@ mock_provider "azapi" {
 
 mock_provider "random" {}
 
+mock_provider "terraform" {}
+
 variables {
   name             = "alert-unit-basic"
   parent_id        = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit"
@@ -89,8 +91,9 @@ run "basic_deployment" {
     error_message = "Telemetry must not be collected when `enable_telemetry` is false."
   }
   providers = {
-    azapi  = azapi
-    random = random
+    azapi     = azapi
+    random    = random
+    terraform = terraform
   }
 }
 
@@ -111,8 +114,9 @@ run "outputs" {
     error_message = "`resource` must expose the alert rule object."
   }
   providers = {
-    azapi  = azapi
-    random = random
+    azapi     = azapi
+    random    = random
+    terraform = terraform
   }
 }
 
@@ -129,8 +133,9 @@ run "disabled_rule" {
     error_message = "`enabled = false` must be sent to Azure."
   }
   providers = {
-    azapi  = azapi
-    random = random
+    azapi     = azapi
+    random    = random
+    terraform = terraform
   }
 }
 
@@ -146,8 +151,9 @@ run "ignore_body_changes_default_is_empty" {
     error_message = "`ignore_body_changes.insights_metric_alerts` must default to an empty list."
   }
   providers = {
-    azapi  = azapi
-    random = random
+    azapi     = azapi
+    random    = random
+    terraform = terraform
   }
 }
 
@@ -165,8 +171,9 @@ run "ignore_body_changes_supplied" {
     error_message = "`ignore_body_changes.insights_metric_alerts` must accept body-relative dot paths."
   }
   providers = {
-    azapi  = azapi
-    random = random
+    azapi     = azapi
+    random    = random
+    terraform = terraform
   }
 }
 
@@ -185,7 +192,8 @@ run "resource_types_override" {
     error_message = "`resource_types.insights_metric_alerts` must override the API version."
   }
   providers = {
-    azapi  = azapi
-    random = random
+    azapi     = azapi
+    random    = random
+    terraform = terraform
   }
 }
