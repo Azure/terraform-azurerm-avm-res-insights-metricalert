@@ -8,6 +8,8 @@ mock_provider "azapi" {
 
 mock_provider "random" {}
 
+mock_provider "terraform" {}
+
 # The AVM interfaces module looks role definitions up by name. This module under
 # test always supplies fully qualified role definition IDs, so the lookup result
 # is deliberately overridden with an empty result set.
@@ -168,7 +170,8 @@ run "complete_deployment" {
     error_message = "The role assignment principal ID must be forwarded."
   }
   providers = {
-    azapi  = azapi
-    random = random
+    azapi     = azapi
+    random    = random
+    terraform = terraform
   }
 }
