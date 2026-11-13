@@ -2,8 +2,8 @@ module "avm_interfaces" {
   source  = "Azure/avm-utl-interfaces/azure"
   version = "0.10.0"
 
-  location         = var.location
   enable_telemetry = var.enable_telemetry
+  location         = var.location
   lock             = var.lock
   # Role definitions available at the alert rule are the same as those available at
   # its resource group, so the lookup is scoped to the parent and the interfaces
