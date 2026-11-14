@@ -13,7 +13,7 @@ module "avm_interfaces" {
 }
 
 resource "azapi_resource" "this" {
-  location  = var.location
+  location  = "global"
   name      = var.name
   parent_id = var.parent_id
   type      = var.resource_types.insights_metric_alerts

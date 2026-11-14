@@ -320,11 +320,56 @@ run "invalid_target_resource_type" {
   }
 }
 
-run "invalid_location" {
+run "telemetry_requires_location" {
   command = plan
 
   variables {
-    location = "swedencentral"
+    enable_telemetry = true
+  }
+
+  expect_failures = [var.location]
+  providers = {
+    azapi  = azapi
+    random = random
+  }
+}
+
+run "telemetry_rejects_null_location" {
+  command = plan
+
+  variables {
+    enable_telemetry = true
+    location         = null
+  }
+
+  expect_failures = [var.location]
+  providers = {
+    azapi  = azapi
+    random = random
+  }
+}
+
+run "telemetry_rejects_global_location" {
+  command = plan
+
+  variables {
+    enable_telemetry = true
+    location         = "Global"
+  }
+
+  expect_failures = [var.location]
+  providers = {
+    azapi  = azapi
+    random = random
+  }
+}
+
+run "telemetry_rejects_blank_location" {
+  command = plan
+
+  variables {
+    enable_telemetry = true
+    location         = " "
   }
 
   expect_failures = [var.location]
