@@ -6,6 +6,8 @@ This example exercises the full surface of the module: a static criterion with `
 
 The rule is scoped to a single storage account, so the module selects the `Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria` criteria model. Azure Monitor does not support multi-resource metric alerts for `Microsoft.Storage/storageAccounts`, which is why this example does not set `target_resource_type` or `target_resource_region`.
 
+The example's `location` is used for supporting resources and enabled telemetry deployments. The metric alert itself remains global.
+
 ```hcl
 terraform {
   required_version = ">= 1.9, < 2.0"
@@ -116,7 +118,7 @@ module "metric_alert" {
   enable_telemetry     = var.enable_telemetry # see variables.tf
   enabled              = true
   evaluation_frequency = "PT5M"
-  location             = "global"
+  location             = var.location
   lock = {
     kind  = "CanNotDelete"
     notes = "Managed by the AVM metric alert example."
@@ -205,7 +207,7 @@ Default: `true`
 
 ### <a name="input_location"></a> [location](#input\_location)
 
-Description: The Azure region used for the supporting resources deployed by this example. The metric alert rule itself is always global.
+Description: The Azure region used for supporting resources and enabled telemetry deployments. The metric alert rule itself is always global.
 
 Type: `string`
 

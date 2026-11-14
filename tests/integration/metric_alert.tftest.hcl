@@ -13,6 +13,7 @@ run "setup" {
 # Create the alert rule with a single static criterion.
 run "create" {
   variables {
+    location  = run.setup.location
     name      = "alert-avm-${run.setup.name_suffix}"
     parent_id = run.setup.resource_group_id
     scopes    = [run.setup.storage_account_id]
@@ -42,6 +43,10 @@ run "create" {
     error_message = "The alert rule must be created with the requested name."
   }
   assert {
+    condition     = output.resource.location == "global" && azapi_resource.telemetry[0].location == run.setup.location
+    error_message = "The metric alert must remain global while telemetry uses the setup region."
+  }
+  assert {
     condition     = can(provider::azapi::parse_resource_id("Microsoft.Insights/metricAlerts", output.resource_id))
     error_message = "The module must return a well formed metric alert resource ID."
   }
@@ -59,6 +64,7 @@ run "create" {
 # and a second action group.
 run "update" {
   variables {
+    location  = run.setup.location
     name      = "alert-avm-${run.setup.name_suffix}"
     parent_id = run.setup.resource_group_id
     scopes    = [run.setup.storage_account_id]
@@ -131,6 +137,7 @@ run "idempotency" {
   command = plan
 
   variables {
+    location  = run.setup.location
     name      = "alert-avm-${run.setup.name_suffix}"
     parent_id = run.setup.resource_group_id
     scopes    = [run.setup.storage_account_id]
