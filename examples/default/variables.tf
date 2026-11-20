@@ -11,5 +11,5 @@ DESCRIPTION
 variable "location" {
   type        = string
   default     = "swedencentral"
-  description = "The Azure region used for the supporting resources deployed by this example. The metric alert rule itself is always global."
+  description = "The Azure region used for supporting resources and enabled telemetry deployments. The metric alert rule itself is always global."
 }

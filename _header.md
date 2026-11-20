@@ -10,6 +10,14 @@ The module targets `Microsoft.Insights/metricAlerts@2026-01-01`, the latest **st
 
 The Terraform inputs are modelled directly on the ARM resource schema rather than on the AzureRM resource, so property names, enums and cardinalities follow the [Azure Monitor metric alerts REST API](https://learn.microsoft.com/rest/api/monitor/metric-alerts).
 
+## Location and telemetry
+
+The metric alert rule is always deployed at `global`. The `location` input instead selects an Azure region for the module's subscription-scoped telemetry deployment and is also forwarded to the interfaces utility. It does not change the alert's location or the monitored resource's region.
+
+Telemetry is enabled by default, so supply a real region available in your Azure cloud, such as `swedencentral`. With `enable_telemetry = false`, `location` can be omitted or set to `null`. Callers using the previous `global` default or explicitly passing `location = "global"` with telemetry enabled must replace it with a real region; the metric alert itself remains global and does not require a state move.
+
+Enabled telemetry requires `Microsoft.Resources/deployments/read`, `Microsoft.Resources/deployments/write`, and `Microsoft.Resources/deployments/delete` at the active subscription scope. See [AVM telemetry](https://aka.ms/avm/telemetry) for details.
+
 ## Criteria models
 
 ARM models the `criteria` property as a discriminated object keyed on `odata.type`. The module derives the discriminator from the inputs instead of asking the consumer to set it:
@@ -45,6 +53,7 @@ module "metric_alert" {
   source  = "Azure/avm-res-insights-metricalert/azurerm"
   version = "~> 0.1"
 
+  location  = "swedencentral"
   name      = "alert-storage-transactions"
   parent_id = azapi_resource.rg.id
   scopes    = [azapi_resource.storage.id]

@@ -28,6 +28,7 @@ run "telemetry_enabled" {
 
   variables {
     enable_telemetry = true
+    location         = "swedencentral"
   }
 
   assert {
@@ -37,6 +38,10 @@ run "telemetry_enabled" {
   assert {
     condition     = length(terraform_data.telemetry) == 1
     error_message = "A telemetry correlation UUID must be generated when telemetry is enabled."
+  }
+  assert {
+    condition     = azapi_resource.telemetry[0].location == var.location && azapi_resource.this.location == "global"
+    error_message = "Telemetry must use the supplied Azure region while the metric alert remains global."
   }
   providers = {
     azapi  = azapi
@@ -58,6 +63,28 @@ run "telemetry_disabled" {
   assert {
     condition     = length(terraform_data.telemetry) == 0
     error_message = "No telemetry correlation UUID must be generated when telemetry is disabled."
+  }
+  assert {
+    condition     = var.location == null && azapi_resource.this.location == "global"
+    error_message = "With telemetry disabled, omitting location must still create a global metric alert."
+  }
+  providers = {
+    azapi  = azapi
+    random = random
+  }
+}
+
+run "telemetry_disabled_null_location" {
+  command = apply
+
+  variables {
+    enable_telemetry = false
+    location         = null
+  }
+
+  assert {
+    condition     = length(azapi_resource.telemetry) == 0 && azapi_resource.this.location == "global"
+    error_message = "An explicit null location must be accepted when telemetry is disabled."
   }
   providers = {
     azapi  = azapi

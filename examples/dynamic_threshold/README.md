@@ -8,6 +8,8 @@ Dynamic thresholds are only supported by the `Microsoft.Azure.Monitor.MultipleRe
 
 Azure Monitor allows exactly one criterion on a dynamic alert rule, so this example supplies a single `dynamic_criteria` entry.
 
+The example's `location` is used for supporting resources and enabled telemetry deployments. The metric alert itself remains global.
+
 ```hcl
 terraform {
   required_version = ">= 1.9, < 2.0"
@@ -100,7 +102,7 @@ module "metric_alert" {
   }
   enable_telemetry     = var.enable_telemetry # see variables.tf
   evaluation_frequency = "PT5M"
-  location             = "global"
+  location             = var.location
   severity             = 3
   window_size          = "PT15M"
 }
@@ -147,7 +149,7 @@ Default: `true`
 
 ### <a name="input_location"></a> [location](#input\_location)
 
-Description: The Azure region used for the supporting resources deployed by this example. The metric alert rule itself is always global.
+Description: The Azure region used for supporting resources and enabled telemetry deployments. The metric alert rule itself is always global.
 
 Type: `string`
 
