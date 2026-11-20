@@ -1,5 +1,10 @@
 mock_provider "azapi" {
   alias = "alternate"
+  mock_resource "azapi_resource" {
+    defaults = {
+      id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit/providers/Microsoft.Insights/metricAlerts/alert-unit-aliased-provider"
+    }
+  }
   mock_data "azapi_client_config" {
     defaults = {
       subscription_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000"
@@ -47,7 +52,7 @@ run "aliased_azapi_provider" {
     error_message = "The module must be usable with an aliased AzAPI provider."
   }
   assert {
-    condition     = output.resource_id != null
-    error_message = "The module must produce a resource ID when driven by an aliased AzAPI provider."
+    condition     = output.resource_id == "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit/providers/Microsoft.Insights/metricAlerts/alert-unit-aliased-provider"
+    error_message = "The fixture must use the alternate AzAPI mock rather than the default provider."
   }
 }
