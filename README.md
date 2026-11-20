@@ -12,6 +12,14 @@ The module targets `Microsoft.Insights/metricAlerts@2026-01-01`, the latest **st
 
 The Terraform inputs are modelled directly on the ARM resource schema rather than on the AzureRM resource, so property names, enums and cardinalities follow the [Azure Monitor metric alerts REST API](https://learn.microsoft.com/rest/api/monitor/metric-alerts).
 
+## Location and telemetry
+
+The metric alert rule is always deployed at `global`. The `location` input instead selects an Azure region for the module's subscription-scoped telemetry deployment and is also forwarded to the interfaces utility. It does not change the alert's location or the monitored resource's region.
+
+Telemetry is enabled by default, so supply a real region available in your Azure cloud, such as `swedencentral`. With `enable_telemetry = false`, `location` can be omitted or set to `null`. Callers using the previous `global` default or explicitly passing `location = "global"` with telemetry enabled must replace it with a real region; the metric alert itself remains global and does not require a state move.
+
+Enabled telemetry requires `Microsoft.Resources/deployments/read`, `Microsoft.Resources/deployments/write`, and `Microsoft.Resources/deployments/delete` at the active subscription scope. See [AVM telemetry](https://aka.ms/avm/telemetry) for details.
+
 ## Criteria models
 
 ARM models the `criteria` property as a discriminated object keyed on `odata.type`. The module derives the discriminator from the inputs instead of asking the consumer to set it:
@@ -47,6 +55,7 @@ module "metric_alert" {
   source  = "Azure/avm-res-insights-metricalert/azurerm"
   version = "~> 0.1"
 
+  location  = "swedencentral"
   name      = "alert-storage-transactions"
   parent_id = azapi_resource.rg.id
   scopes    = [azapi_resource.storage.id]
@@ -308,11 +317,11 @@ Default: `{}`
 
 ### <a name="input_location"></a> [location](#input\_location)
 
-Description: (Optional) The Azure region of the metric alert rule. `Microsoft.Insights/metricAlerts` is a global resource type, so `global` is the only value the Azure Monitor API accepts.
+Description: The Azure region for this module's telemetry deployment. Required when telemetry is enabled; otherwise it can be omitted or null. The metric alert rule itself is always global.
 
 Type: `string`
 
-Default: `"global"`
+Default: `null`
 
 ### <a name="input_lock"></a> [lock](#input\_lock)
 
@@ -563,10 +572,14 @@ The following Modules are called:
 
 Source: Azure/avm-utl-interfaces/azure
 
-Version: 0.9.0
+Version: 0.10.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection
 
-The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the repository. There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft’s privacy statement. Our privacy statement is located at <https://go.microsoft.com/fwlink/?LinkID=824704>. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
+The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the [repository](https://aka.ms/avm/telemetry). There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft's privacy statement. Our privacy statement is located at <https://go.microsoft.com/fwlink/?LinkID=824704>. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
+
+## Trademarks
+
+**Trademarks** This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party's policies.
 <!-- END_TF_DOCS -->

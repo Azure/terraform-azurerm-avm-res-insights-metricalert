@@ -4,6 +4,8 @@
 
 This deploys the module in its simplest form.
 
+The example's `location` is used for supporting resources and enabled telemetry deployments. The metric alert itself remains global.
+
 ```hcl
 terraform {
   required_version = ">= 1.9, < 2.0"
@@ -70,15 +72,12 @@ resource "azapi_resource" "storage" {
 # This is the module call.
 module "metric_alert" {
   source = "../../"
-  providers = {
-    azapi = azapi
-  }
 
   name             = "alert-storage-transactions-${random_string.suffix.result}"
   parent_id        = azapi_resource.rg.id
   scopes           = [azapi_resource.storage.id]
   enable_telemetry = var.enable_telemetry # see variables.tf
-  location         = "global"
+  location         = var.location
   static_criteria = {
     transactions = {
       name        = "HighTransactionCount"
@@ -132,7 +131,7 @@ Default: `true`
 
 ### <a name="input_location"></a> [location](#input\_location)
 
-Description: The Azure region used for the supporting resources deployed by this example. The metric alert rule itself is always global.
+Description: The Azure region used for supporting resources and enabled telemetry deployments. The metric alert rule itself is always global.
 
 Type: `string`
 

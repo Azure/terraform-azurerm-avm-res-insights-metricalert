@@ -220,13 +220,16 @@ DESCRIPTION
 
 variable "location" {
   type        = string
-  default     = "global"
-  description = "(Optional) The Azure region of the metric alert rule. `Microsoft.Insights/metricAlerts` is a global resource type, so `global` is the only value the Azure Monitor API accepts."
-  nullable    = false
+  default     = null
+  description = "The Azure region for this module's telemetry deployment. Required when telemetry is enabled; otherwise it can be omitted or null. The metric alert rule itself is always global."
 
   validation {
-    condition     = lower(var.location) == "global"
-    error_message = "`location` must be `global`. `Microsoft.Insights/metricAlerts` is a global resource type."
+    condition     = !var.enable_telemetry || var.location != null
+    error_message = "The location must not be null when telemetry is enabled."
+  }
+  validation {
+    condition     = !var.enable_telemetry || (var.location == null ? true : trimspace(var.location) != "" && lower(trimspace(var.location)) != "global")
+    error_message = "The location must be a non-empty Azure region, not `global`, when telemetry is enabled."
   }
 }
 

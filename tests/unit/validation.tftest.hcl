@@ -8,8 +8,6 @@ mock_provider "azapi" {
 
 mock_provider "random" {}
 
-mock_provider "terraform" {}
-
 variables {
   name             = "alert-unit-validation"
   parent_id        = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit"
@@ -35,9 +33,8 @@ run "invalid_severity" {
 
   expect_failures = [var.severity]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -50,9 +47,8 @@ run "empty_scopes" {
 
   expect_failures = [var.scopes]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -65,9 +61,8 @@ run "invalid_scope_id" {
 
   expect_failures = [var.scopes]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -88,9 +83,8 @@ run "invalid_static_aggregation" {
 
   expect_failures = [var.static_criteria]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -111,9 +105,8 @@ run "invalid_static_operator" {
 
   expect_failures = [var.static_criteria]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -135,9 +128,8 @@ run "invalid_dynamic_operator" {
 
   expect_failures = [var.dynamic_criteria]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -161,9 +153,8 @@ run "invalid_dynamic_failing_periods" {
 
   expect_failures = [var.dynamic_criteria]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -187,9 +178,8 @@ run "fractional_dynamic_failing_periods" {
 
   expect_failures = [var.dynamic_criteria]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -217,9 +207,8 @@ run "invalid_dimension_operator" {
 
   expect_failures = [var.static_criteria]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -247,9 +236,8 @@ run "missing_dimension_values" {
 
   expect_failures = [var.static_criteria]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -262,9 +250,8 @@ run "invalid_evaluation_frequency" {
 
   expect_failures = [var.evaluation_frequency]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -278,9 +265,8 @@ run "window_size_smaller_than_evaluation_frequency" {
 
   expect_failures = [var.window_size]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -297,9 +283,8 @@ run "invalid_action_group_id" {
 
   expect_failures = [var.actions]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -316,9 +301,8 @@ run "empty_action_group_id" {
 
   expect_failures = [var.actions]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -331,24 +315,67 @@ run "invalid_target_resource_type" {
 
   expect_failures = [var.target_resource_type]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
-run "invalid_location" {
+run "telemetry_requires_location" {
   command = plan
 
   variables {
-    location = "swedencentral"
+    enable_telemetry = true
   }
 
   expect_failures = [var.location]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
+  }
+}
+
+run "telemetry_rejects_null_location" {
+  command = plan
+
+  variables {
+    enable_telemetry = true
+    location         = null
+  }
+
+  expect_failures = [var.location]
+  providers = {
+    azapi  = azapi
+    random = random
+  }
+}
+
+run "telemetry_rejects_global_location" {
+  command = plan
+
+  variables {
+    enable_telemetry = true
+    location         = "Global"
+  }
+
+  expect_failures = [var.location]
+  providers = {
+    azapi  = azapi
+    random = random
+  }
+}
+
+run "telemetry_rejects_blank_location" {
+  command = plan
+
+  variables {
+    enable_telemetry = true
+    location         = " "
+  }
+
+  expect_failures = [var.location]
+  providers = {
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -361,9 +388,8 @@ run "no_criteria_supplied" {
 
   expect_failures = [azapi_resource.this]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -382,9 +408,8 @@ run "webtest_criteria_cannot_be_combined_with_metric_criteria" {
 
   expect_failures = [azapi_resource.this]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -404,9 +429,8 @@ run "fractional_failed_location_count" {
 
   expect_failures = [var.webtest_criteria]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -434,9 +458,8 @@ run "duplicate_criterion_names" {
 
   expect_failures = [azapi_resource.this]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -452,8 +475,7 @@ run "multiple_scopes_require_target_resource_type_and_region" {
 
   expect_failures = [azapi_resource.this]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }

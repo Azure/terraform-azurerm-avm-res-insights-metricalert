@@ -8,8 +8,6 @@ mock_provider "azapi" {
 
 mock_provider "random" {}
 
-mock_provider "terraform" {}
-
 variables {
   name      = "alert-unit-telemetry"
   parent_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit"
@@ -30,6 +28,7 @@ run "telemetry_enabled" {
 
   variables {
     enable_telemetry = true
+    location         = "swedencentral"
   }
 
   assert {
@@ -41,20 +40,12 @@ run "telemetry_enabled" {
     error_message = "A telemetry correlation UUID must be generated when telemetry is enabled."
   }
   assert {
-    condition = (
-      azapi_resource.telemetry[0].type == "Microsoft.Resources/deployments@2025-04-01" &&
-      azapi_resource.telemetry[0].parent_id == "/subscriptions/00000000-0000-0000-0000-000000000000" &&
-      azapi_resource.telemetry[0].location == var.location &&
-      azapi_resource.telemetry[0].body.properties.mode == "Incremental" &&
-      length(azapi_resource.telemetry[0].body.properties.template.resources) == 0 &&
-      startswith(azapi_resource.telemetry[0].name, "${jsondecode(file("metadata.json")).telemetryIdPrefix}.")
-    )
-    error_message = "Telemetry must use the metadata-backed empty incremental deployment at the active subscription."
+    condition     = azapi_resource.telemetry[0].location == var.location && azapi_resource.this.location == "global"
+    error_message = "Telemetry must use the supplied Azure region while the metric alert remains global."
   }
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -74,12 +65,29 @@ run "telemetry_disabled" {
     error_message = "No telemetry correlation UUID must be generated when telemetry is disabled."
   }
   assert {
-    condition     = length(data.azapi_client_config.telemetry) == 0
-    error_message = "Opting out must also omit the telemetry client configuration lookup."
+    condition     = var.location == null && azapi_resource.this.location == "global"
+    error_message = "With telemetry disabled, omitting location must still create a global metric alert."
   }
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
+  }
+}
+
+run "telemetry_disabled_null_location" {
+  command = apply
+
+  variables {
+    enable_telemetry = false
+    location         = null
+  }
+
+  assert {
+    condition     = length(azapi_resource.telemetry) == 0 && azapi_resource.this.location == "global"
+    error_message = "An explicit null location must be accepted when telemetry is disabled."
+  }
+  providers = {
+    azapi  = azapi
+    random = random
   }
 }

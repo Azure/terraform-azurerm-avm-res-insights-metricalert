@@ -8,8 +8,6 @@ mock_provider "azapi" {
 
 mock_provider "random" {}
 
-mock_provider "terraform" {}
-
 variables {
   name             = "alert-unit-criteria"
   parent_id        = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-unit"
@@ -57,9 +55,8 @@ run "dynamic_thresholds" {
     error_message = "`min_failing_periods_to_alert` must be rendered as `failingPeriods.minFailingPeriodsToAlert`."
   }
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -91,9 +88,8 @@ run "static_and_dynamic_criteria_cannot_be_combined" {
 
   expect_failures = [azapi_resource.this]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -122,9 +118,8 @@ run "multiple_dynamic_criteria_are_rejected" {
 
   expect_failures = [azapi_resource.this]
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -174,9 +169,8 @@ run "dimension_include_and_exclude" {
     error_message = "The `Exclude` dimension operator must be preserved."
   }
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -220,9 +214,8 @@ run "multiple_scopes" {
     error_message = "`target_resource_region` must be sent to Azure."
   }
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -257,9 +250,8 @@ run "webtest_criteria" {
     error_message = "`allOf` must be absent for the web test availability criteria model."
   }
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
 
@@ -303,8 +295,7 @@ run "multiple_action_groups" {
     error_message = "`webhook_properties` must be rendered as `webHookProperties`."
   }
   providers = {
-    azapi     = azapi
-    random    = random
-    terraform = terraform
+    azapi  = azapi
+    random = random
   }
 }
