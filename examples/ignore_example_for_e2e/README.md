@@ -6,6 +6,8 @@ This example demonstrates the `webtest_criteria` input, which selects the `Micro
 
 It is excluded from the e2e test run by the `.e2eignore` file in this directory: classic Application Insights web tests depend on outbound internet reachability from the Microsoft-managed test agents, which is not a reliable assumption in the AVM test subscriptions.
 
+The example's `location` is used for supporting resources and enabled telemetry deployments. The metric alert itself remains global.
+
 ```hcl
 terraform {
   required_version = ">= 1.9, < 2.0"
@@ -125,7 +127,7 @@ module "metric_alert" {
   description            = "Alerts when the web test fails from more than one location."
   enable_telemetry       = var.enable_telemetry # see variables.tf
   evaluation_frequency   = "PT1M"
-  location               = "global"
+  location               = var.location
   severity               = 1
   target_resource_region = var.location
   target_resource_type   = "Microsoft.Insights/webtests"
@@ -181,7 +183,7 @@ Default: `true`
 
 ### <a name="input_location"></a> [location](#input\_location)
 
-Description: The Azure region used for the supporting resources deployed by this example. The metric alert rule itself is always global.
+Description: The Azure region used for supporting resources and enabled telemetry deployments. The metric alert rule itself is always global.
 
 Type: `string`
 

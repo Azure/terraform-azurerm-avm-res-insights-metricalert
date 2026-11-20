@@ -68,7 +68,7 @@ module "metric_alert" {
   parent_id        = azapi_resource.rg.id
   scopes           = [azapi_resource.storage.id]
   enable_telemetry = var.enable_telemetry # see variables.tf
-  location         = "global"
+  location         = var.location
   static_criteria = {
     transactions = {
       name        = "HighTransactionCount"

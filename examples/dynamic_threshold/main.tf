@@ -89,7 +89,7 @@ module "metric_alert" {
   }
   enable_telemetry     = var.enable_telemetry # see variables.tf
   evaluation_frequency = "PT5M"
-  location             = "global"
+  location             = var.location
   severity             = 3
   window_size          = "PT15M"
 }
